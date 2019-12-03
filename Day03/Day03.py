@@ -94,3 +94,83 @@ lines = input_file.readlines()
 part1 = min_distance(find_intersections(lines[0].split(','), lines[1].split(',')))
 print(part1)
 
+"""
+Part 2
+It turns out that this circuit is very timing-sensitive; you actually need to minimize the signal delay.
+
+To do this, calculate the number of steps each wire takes to reach each intersection; choose the intersection where 
+the sum of both wires' steps is lowest. If a wire visits a position on the grid multiple times, use the steps value 
+from the first time it visits that position when calculating the total value of a specific intersection. 
+
+The number of steps a wire takes is the total number of grid squares the wire has entered to get to that location, 
+including the intersection being considered. 
+"""
+
+
+def count_steps(path, coordinate) -> int:
+    x1 = y1 = 0
+    steps = 0
+    for s in path:
+        direction = s[0]
+        length = int(s[1:])
+        if direction == 'R':
+            for i in range(length):
+                x1 += 1
+                steps += 1
+                if (x1, y1) == coordinate:
+                    return steps
+        elif direction == 'L':
+            for i in range(length):
+                x1 -= 1
+                steps += 1
+                if (x1, y1) == coordinate:
+                    return steps
+        elif direction == 'U':
+            for i in range(length):
+                y1 += 1
+                steps += 1
+                if (x1, y1) == coordinate:
+                    return steps
+        elif direction == 'D':
+            for i in range(length):
+                y1 -= 1
+                steps += 1
+                if (x1, y1) == coordinate:
+                    return steps
+        else:
+            raise RuntimeError(f"invalid direction path1: {direction}")
+
+    return steps
+
+# lines[0].split(','), lines[1].split(',')
+
+
+intersections1 = find_intersections(test_path1, test_path2)
+steps1 = []
+intersections2 = find_intersections(test_path3, test_path4)
+steps2 = []
+
+for cross in intersections1:
+    s1 = count_steps(test_path1, cross)
+    s2 = count_steps(test_path2, cross)
+    steps1.append(s1 + s2)
+
+for cross in intersections2:
+    s1 = count_steps(test_path3, cross)
+    s2 = count_steps(test_path4, cross)
+    steps2.append(s1 + s2)
+
+assert (min(steps1) == 30)
+assert (min(steps2) == 610)
+
+ACTUALINTERSECTIONS = find_intersections(lines[0].split(','), lines[1].split(','))
+ACTUALSTEPS = []
+
+for cross in ACTUALINTERSECTIONS:
+    s1 = count_steps(lines[0].split(','), cross)
+    s2 = count_steps(lines[1].split(','), cross)
+    ACTUALSTEPS.append(s1 + s2)
+
+
+part2 = min(ACTUALSTEPS)
+print(part2)
