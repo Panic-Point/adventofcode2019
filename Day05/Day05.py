@@ -16,6 +16,12 @@ part 1:
 8. if mode == 1 then take value of position instead of value AT position. i.e. take opcode[i] instead of opcode[i+1]
 9. return results list
 
+part 2:
+1. add if instruction == 5. check opcode i + 1. If non-zero then i = opcode[i+2]
+2. add if instuction == 6. check opcode i + 1. If zero then i = opcode[i+2]
+3. add if instruction == 7. check opcode i + 1 < opcode i + 2 then opcode[i+3] = 1 else opcode[i+3] = 0
+4. add if instruction == 8. check opcode i + 1 = opcode i + 2 then opcode[i+3] = 1 else opcode[i+3] = 0
+5. carry on same modes from part 1
 """
 
 from typing import List
@@ -40,6 +46,7 @@ def interpret(opcode: Opcode, input: int) -> List[int]:
         mode1 = parameter[2]
         mode2 = parameter[1]
         mode3 = parameter[0]
+        # print(f"current location {i}, current instruction {instruction}")
         # add numbers indicated by the next two numbers and store in position indicated by the 3rd number
         if instruction == 1:
             if mode1 == 0:
@@ -59,7 +66,7 @@ def interpret(opcode: Opcode, input: int) -> List[int]:
             else:
                 raise RuntimeError(f"invalid Mode: {mode3}")
             output = p1 + p2
-            # print(f"Writing {output} to position {opcode[p3]}")
+            # print(f"Writing {output} to position {p3}")
             opcode[p3] = output
             i += 4
         # multiply  numbers indicated by the next two numbers and store in position indicated by the 3rd number
@@ -81,7 +88,7 @@ def interpret(opcode: Opcode, input: int) -> List[int]:
             else:
                 raise RuntimeError(f"invalid Mode: {mode3}")
             output = p1 * p2
-            # print(f"Writing {output} to position {opcode[p3]}")
+            # print(f"Writing {output} to position {p3}")
             opcode[p3] = output
             i += 4
         elif instruction == 3:
@@ -98,15 +105,105 @@ def interpret(opcode: Opcode, input: int) -> List[int]:
             i += 2
             # print(f"Adding {output} to results")
             result.append(output)
+        elif instruction == 5:
+            if mode1 == 0:
+                p1 = opcode[opcode[i + 1]]
+            elif mode1 == 1:
+                p1 = opcode[i + 1]
+            else:
+                raise RuntimeError(f"invalid Mode: {mode1}")
+            if mode2 == 0:
+                p2 = opcode[opcode[i + 2]]
+            elif mode2 == 1:
+                p2 = opcode[i + 2]
+            else:
+                raise RuntimeError(f"invalid Mode: {mode2}")
+            if p1 != 0:
+                # print(f"jumping to position {p2} with value of {opcode[p2]}")
+                i = p2
+            else:
+                # print(f"jumping to position {i+3} with value of {opcode[i+3]}")
+                i += 3
+        elif instruction == 6:
+            if mode1 == 0:
+                p1 = opcode[opcode[i + 1]]
+            elif mode1 == 1:
+                p1 = opcode[i + 1]
+            else:
+                raise RuntimeError(f"invalid Mode: {mode1}")
+            if mode2 == 0:
+                p2 = opcode[opcode[i + 2]]
+            elif mode2 == 1:
+                p2 = opcode[i + 2]
+            else:
+                raise RuntimeError(f"invalid Mode: {mode2}")
+            if p1 == 0:
+                # print(f"jumping to position {p2} with value of {opcode[p2]}")
+                i = p2
+            else:
+                # print(f"jumping to position {i+3} with value of {opcode[i+3]}")
+                i += 3
+        elif instruction == 7:
+            if mode1 == 0:
+                p1 = opcode[opcode[i + 1]]
+            elif mode1 == 1:
+                p1 = opcode[i + 1]
+            else:
+                raise RuntimeError(f"invalid Mode: {mode1}")
+            if mode2 == 0:
+                p2 = opcode[opcode[i + 2]]
+            elif mode2 == 1:
+                p2 = opcode[i + 2]
+            else:
+                raise RuntimeError(f"invalid Mode: {mode2}")
+            if mode3 == 0:
+                p3 = opcode[i + 3]
+            elif mode3 == 1:
+                p3 = i + 3
+            else:
+                raise RuntimeError(f"invalid Mode: {mode3}")
+            if p1 < p2:
+                # print(f"Writing 1 to position {opcode[p3]}")
+                opcode[p3] = 1
+            else:
+                # print(f"Writing 0 to position {opcode[p3]}")
+                opcode[p3] = 0
+            i += 4
+        elif instruction == 8:
+            if mode1 == 0:
+                p1 = opcode[opcode[i + 1]]
+            elif mode1 == 1:
+                p1 = opcode[i + 1]
+            else:
+                raise RuntimeError(f"invalid Mode: {mode1}")
+            if mode2 == 0:
+                p2 = opcode[opcode[i + 2]]
+            elif mode2 == 1:
+                p2 = opcode[i + 2]
+            else:
+                raise RuntimeError(f"invalid Mode: {mode2}")
+            if mode3 == 0:
+                p3 = opcode[i + 3]
+            elif mode3 == 1:
+                p3 = i + 3
+            else:
+                raise RuntimeError(f"invalid Mode: {mode3}")
+            if p1 == p2:
+                # print(f"Writing 1 to position {opcode[p3]}")
+                opcode[p3] = 1
+            else:
+                # print(f"Writing 0 to position {opcode[p3]}")
+                opcode[p3] = 0
+            i += 4
         else:
-            raise RuntimeError(f"invalid instruction: {instruction}")
+            raise RuntimeError(f"invalid opcode: {opcode[i]}")
 
     return result
 
 
 def run(opcode: Opcode) -> int:
     opcode = opcode[:]  # create copy of code
-    return interpret(opcode, 1)
+    return interpret(opcode, 5)
 
 
 ACTUALCODE = [3, 225, 1, 225, 6, 6, 1100, 1, 238, 225, 104, 0, 1101, 65, 39, 225, 2, 14, 169, 224, 101, -2340, 224,
