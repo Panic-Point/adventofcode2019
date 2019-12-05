@@ -16,12 +16,6 @@ part 1:
 8. if mode == 1 then take value of position instead of value AT position. i.e. take opcode[i] instead of opcode[i+1]
 9. return results list
 
-part 2:
-1. add if instruction == 5. check opcode i + 1. If non-zero then i = opcode[i+2]
-2. add if instuction == 6. check opcode i + 1. If zero then i = opcode[i+2]
-3. add if instruction == 7. check opcode i + 1 < opcode i + 2 then opcode[i+3] = 1 else opcode[i+3] = 0
-4. add if instruction == 8. check opcode i + 1 = opcode i + 2 then opcode[i+3] = 1 else opcode[i+3] = 0
-5. carry on same modes from part 1
 """
 
 from typing import List
