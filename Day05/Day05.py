@@ -13,7 +13,7 @@ part 1:
     mode2 = parameter[1]
     mode3 = parameter[0]
 7. if mode == 0 follow steps above
-8. if mode == 1 then take value of position instead of value AT position. i.e. take opcode[i] instead of opcode[i+1]
+8. if mode == 1 then take value of position instead of value AT position. i.e. take opcode[i+1] instead of opcode[opcode[i+1]]
 9. return results list
 
 part 2:
