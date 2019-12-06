@@ -21,14 +21,14 @@ def is_valid(password: int) -> bool:
     return correct_length and double and increasing
 
 
-def has_duplicate(password: List[str]) -> bool:
+def has_duplicate(password: List[int]) -> bool:
     for i in range(1, len(password)):
         if password[i] == password[i-1]:
             return True
     return False
 
 
-def is_increasing(password: List[str]) -> bool:
+def is_increasing(password: List[int]) -> bool:
     for i in range(1, len(password)):
         if password[i] < password[i-1]:
             return False
@@ -46,6 +46,7 @@ def count_valid(low: int = ACTUALLOW, high: int = ACTUALHIGH) -> int:
         if is_valid(num):
             count += 1
     return count
+
 
 """
 Part 2:
@@ -86,4 +87,3 @@ assert is_valid2(111122)
 
 print(count_valid())
 print(count_valid2())
-
