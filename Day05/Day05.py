@@ -37,7 +37,7 @@ def digits(n: int, num_digits: int = 6) -> List[int]:
     return list(reversed(d))
 
 
-def interpret(opcode: Opcode, input: int) -> List[int]:
+def interpret(opcode: Opcode, input_instruction: List[int]) -> List[int]:
     i = 0
     result = []
     while opcode[i] != 99:  # halts
@@ -93,7 +93,8 @@ def interpret(opcode: Opcode, input: int) -> List[int]:
             i += 4
         elif instruction == 3:
             p1 = opcode[i + 1]
-            opcode[p1] = input
+            opcode[p1] = input_instruction[0]
+            input_instruction = input_instruction[1:]
             i += 2
             # print(f"Writing {input} to position {p1}")
         elif instruction == 4:
@@ -203,7 +204,7 @@ def interpret(opcode: Opcode, input: int) -> List[int]:
 
 def run(opcode: Opcode) -> int:
     opcode = opcode[:]  # create copy of code
-    return interpret(opcode, 5)
+    return interpret(opcode, [5])
 
 
 ACTUALCODE = [3, 225, 1, 225, 6, 6, 1100, 1, 238, 225, 104, 0, 1101, 65, 39, 225, 2, 14, 169, 224, 101, -2340, 224,
