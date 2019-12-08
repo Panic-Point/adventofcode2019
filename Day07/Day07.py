@@ -1,27 +1,5 @@
 """
-https://adventofcode.com/2019/day/5
-instructions online are garbage
-
-part 1:
-1. Add new variable parameter
-2. Instruction = last two digits of parameter
-3. instructions follow day 2 code
-4. add if instruction == 3 then store input value(taken as input parameter) to position in indicated in value i+1
-5. add if instruciton == 4 then store save value at position i+1 to results list to be returned later
-6. add 3 mode variables that get value from parameter reading right from left
-    mode1 = parameter[2]
-    mode2 = parameter[1]
-    mode3 = parameter[0]
-7. if mode == 0 follow steps above
-8. if mode == 1 then take value of position instead of value AT position. i.e. take opcode[i] instead of opcode[i+1]
-9. return results list
-
-part 2:
-1. add if instruction == 5. check opcode i + 1. If non-zero then i = opcode[i+2]
-2. add if instuction == 6. check opcode i + 1. If zero then i = opcode[i+2]
-3. add if instruction == 7. check opcode i + 1 < opcode i + 2 then opcode[i+3] = 1 else opcode[i+3] = 0
-4. add if instruction == 8. check opcode i + 1 = opcode i + 2 then opcode[i+3] = 1 else opcode[i+3] = 0
-5. carry on same modes from part 1
+https://adventofcode.com/2019/day/7
 """
 
 from typing import List
