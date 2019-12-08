@@ -1,5 +1,6 @@
 """
 https://adventofcode.com/2019/day/8
+part1
 """
 from typing import List
 from itertools import islice
@@ -37,6 +38,10 @@ def corruption_check(image: int) -> int:
 
 print(corruption_check(inp))
 
+"""
+part2
+start at the last layer and push up numbers if layer above is transparent
+"""
 
 def push_up(layer1: List[int], layer2: List[int]) -> List[int]:
     for i in range(len(layer1)):
