@@ -1,7 +1,3 @@
-"""
-After solving this problem I went back and refactored this code,
-under the assumption that I'd probably have to use it again on a later day.
-"""
 from typing import List, NamedTuple, Tuple
 from enum import Enum
 
@@ -45,6 +41,7 @@ class Computer:
         self.inputs = []
         self.pos = 0
         self.rel_base = 0
+        self.step = 0
 
     def get_value(self, pos, mode: int) -> int:
         if mode == 0:
@@ -72,23 +69,30 @@ class Computer:
                 value1 = self.get_value(self.pos + 1, modes[0])
                 value2 = self.get_value(self.pos + 2, modes[1])
                 program[program[self.pos + 3]] = value1 + value2
+                print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, output {value1 + value2} to {self.program[self.pos + 3]}")
                 self.pos += 4
             elif opcode == Opcode.MULTIPLY:
                 value1 = self.get_value(self.pos + 1, modes[0])
                 value2 = self.get_value(self.pos + 2, modes[1])
                 program[program[self.pos + 3]] = value1 * value2
+                print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, output {value1 * value2} to {self.program[self.pos + 3]}")
                 self.pos += 4
             elif opcode == Opcode.STORE_INPUT:
                 # Get input and store at location
-                loc = program[self.pos + 1]
+                if modes[0] == 2:
+                    value1 = self.rel_base + self.program[self.pos + 1]
+                else:
+                    value1 = self.program[self.pos + 1]
                 input_value = input[0]
                 input = input[1:]
-                program[loc] = input_value
+                print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, input_value {input_value} stored to {value1}")
+                self.program[value1] = input_value
                 self.pos += 2
             elif opcode == Opcode.SEND_TO_OUTPUT:
                 # Get output from location
                 value = self.get_value(self.pos + 1, modes[0])
                 output.append(value)
+                print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value}, output {output}")
                 self.pos += 2
 
             elif opcode == Opcode.JUMP_IF_TRUE:
@@ -97,8 +101,10 @@ class Computer:
                 value2 = self.get_value(self.pos + 2, modes[1])
 
                 if value1 != 0:
+                    print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, jump to {value2}")
                     self.pos = value2
                 else:
+                    print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, don't jump")
                     self.pos += 3
 
             elif opcode == Opcode.JUMP_IF_FALSE:
@@ -106,8 +112,10 @@ class Computer:
                 value2 = self.get_value(self.pos + 2, modes[1])
 
                 if value1 == 0:
+                    print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, jump to {value2}")
                     self.pos = value2
                 else:
+                    print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, don't jump")
                     self.pos += 3
 
             elif opcode == Opcode.LESS_THAN:
@@ -116,8 +124,10 @@ class Computer:
 
                 if value1 < value2:
                     program[program[self.pos + 3]] = 1
+                    print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, output 1 to {self.program[self.pos + 3]}")
                 else:
                     program[program[self.pos + 3]] = 0
+                    print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, output 0 to {self.program[self.pos + 3]}")
                 self.pos += 4
 
             elif opcode == Opcode.EQUALS:
@@ -126,21 +136,25 @@ class Computer:
 
                 if value1 == value2:
                     program[program[self.pos + 3]] = 1
+                    print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, output 1 to {self.program[self.pos + 3]}")
                 else:
                     program[program[self.pos + 3]] = 0
+                    print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, output 0 to {self.program[self.pos + 3]}")
                 self.pos += 4
 
             elif opcode == Opcode.OFFSET:
                 value1 = self.get_value(self.pos + 1, modes[0])
+                print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, current base {self.rel_base}, offset by {value1}, new base {self.rel_base + value1}")
                 self.rel_base += value1
                 self.pos += 2
 
             else:
                 raise RuntimeError(f"invalid opcode: {opcode}")
+            self.step += 1
 
         return output
 
-
+"""
 PROG1 = [109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99]
 test1 = Computer(PROG1)
 assert test1.run([]) == [109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99]
@@ -153,6 +167,8 @@ assert len([d for d in str(output2[0])]) == 16
 PROG3 = [104, 1125899906842624, 99]
 test3 = Computer(PROG3)
 assert test3.run([]) == [1125899906842624]
+"""
+
 
 PROGRAM = [1102, 34463338, 34463338, 63, 1007, 63, 34463338, 63, 1005, 63, 53, 1102, 3, 1, 1000, 109, 988, 209, 12, 9,
            1000, 209, 6, 209, 3, 203, 0, 1008, 1000, 1, 63, 1005, 63, 65, 1008, 1000, 2, 63, 1005, 63, 904, 1008, 1000,
