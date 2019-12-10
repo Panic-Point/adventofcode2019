@@ -1,5 +1,5 @@
-from typing import List, NamedTuple, Tuple
 from enum import Enum
+from typing import List, Tuple
 
 
 class Opcode(Enum):
@@ -56,6 +56,14 @@ class Computer:
         else:
             raise ValueError(f"unknown mode: {mode}")
 
+    def get_out_pos(self, pos: int, mode: int):
+        if mode == 0:
+            # pointer mode
+            return self.program[pos]
+        if mode == 2:
+            # relative mode
+            return self.program[pos] + self.rel_base
+
     def run(self, input: List[int]) -> List[int]:
         program = self.program
         output = []
@@ -68,31 +76,34 @@ class Computer:
             elif opcode == Opcode.ADD:
                 value1 = self.get_value(self.pos + 1, modes[0])
                 value2 = self.get_value(self.pos + 2, modes[1])
-                program[program[self.pos + 3]] = value1 + value2
-                print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, output {value1 + value2} to {self.program[self.pos + 3]}")
+                out_pos = self.get_out_pos(self.pos + 3, modes[2])
+                program[out_pos] = value1 + value2
+                # print(
+                #    f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, output {value1 + value2} to {out_pos}")
                 self.pos += 4
             elif opcode == Opcode.MULTIPLY:
                 value1 = self.get_value(self.pos + 1, modes[0])
                 value2 = self.get_value(self.pos + 2, modes[1])
-                program[program[self.pos + 3]] = value1 * value2
-                print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, output {value1 * value2} to {self.program[self.pos + 3]}")
+                out_pos = self.get_out_pos(self.pos + 3, modes[2])
+                program[out_pos] = value1 * value2
+                # print(
+                #    f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, output {value1 * value2} to {out_pos}")
                 self.pos += 4
             elif opcode == Opcode.STORE_INPUT:
                 # Get input and store at location
-                if modes[0] == 2:
-                    value1 = self.rel_base + self.program[self.pos + 1]
-                else:
-                    value1 = self.program[self.pos + 1]
+                out_pos = self.get_out_pos(self.pos + 1, modes[0])
                 input_value = input[0]
                 input = input[1:]
-                print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, input_value {input_value} stored to {value1}")
-                self.program[value1] = input_value
+                # print(
+                #    f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, input_value {input_value} stored to {out_pos}")
+                self.program[out_pos] = input_value
                 self.pos += 2
             elif opcode == Opcode.SEND_TO_OUTPUT:
                 # Get output from location
                 value = self.get_value(self.pos + 1, modes[0])
                 output.append(value)
-                print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value}, output {output}")
+                # print(
+                #   f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value}, output {output}")
                 self.pos += 2
 
             elif opcode == Opcode.JUMP_IF_TRUE:
@@ -101,10 +112,12 @@ class Computer:
                 value2 = self.get_value(self.pos + 2, modes[1])
 
                 if value1 != 0:
-                    print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, jump to {value2}")
+                    # print(
+                    #    f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, jump to {value2}")
                     self.pos = value2
                 else:
-                    print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, don't jump")
+                    # print(
+                    #    f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, don't jump")
                     self.pos += 3
 
             elif opcode == Opcode.JUMP_IF_FALSE:
@@ -112,39 +125,48 @@ class Computer:
                 value2 = self.get_value(self.pos + 2, modes[1])
 
                 if value1 == 0:
-                    print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, jump to {value2}")
+                    # print(
+                    #    f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, jump to {value2}")
                     self.pos = value2
                 else:
-                    print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, don't jump")
+                    # print(
+                    #    f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, don't jump")
                     self.pos += 3
 
             elif opcode == Opcode.LESS_THAN:
                 value1 = self.get_value(self.pos + 1, modes[0])
                 value2 = self.get_value(self.pos + 2, modes[1])
+                out_pos = self.get_out_pos(self.pos + 3, modes[2])
 
                 if value1 < value2:
-                    program[program[self.pos + 3]] = 1
-                    print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, output 1 to {self.program[self.pos + 3]}")
+                    program[out_pos] = 1
+                    # print(
+                    #    f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, output 1 to {out_pos}")
                 else:
-                    program[program[self.pos + 3]] = 0
-                    print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, output 0 to {self.program[self.pos + 3]}")
+                    program[out_pos] = 0
+                    # print(
+                    #   f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, output 0 to {out_pos}")
                 self.pos += 4
 
             elif opcode == Opcode.EQUALS:
                 value1 = self.get_value(self.pos + 1, modes[0])
                 value2 = self.get_value(self.pos + 2, modes[1])
+                out_pos = self.get_out_pos(self.pos + 3, modes[2])
 
                 if value1 == value2:
-                    program[program[self.pos + 3]] = 1
-                    print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, output 1 to {self.program[self.pos + 3]}")
+                    program[out_pos] = 1
+                    # print(
+                    #    f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, output 1 to {out_pos}")
                 else:
-                    program[program[self.pos + 3]] = 0
-                    print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, output 0 to {self.program[self.pos + 3]}")
+                    program[out_pos] = 0
+                    # print(
+                    #    f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value1}, value2 {value2}, output 0 to {out_pos}")
                 self.pos += 4
 
             elif opcode == Opcode.OFFSET:
                 value1 = self.get_value(self.pos + 1, modes[0])
-                print(f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, current base {self.rel_base}, offset by {value1}, new base {self.rel_base + value1}")
+                # print(
+                #    f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, current base {self.rel_base}, offset by {value1}, new base {self.rel_base + value1}")
                 self.rel_base += value1
                 self.pos += 2
 
@@ -153,6 +175,7 @@ class Computer:
             self.step += 1
 
         return output
+
 
 """
 PROG1 = [109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99]
@@ -168,7 +191,6 @@ PROG3 = [104, 1125899906842624, 99]
 test3 = Computer(PROG3)
 assert test3.run([]) == [1125899906842624]
 """
-
 
 PROGRAM = [1102, 34463338, 34463338, 63, 1007, 63, 34463338, 63, 1005, 63, 53, 1102, 3, 1, 1000, 109, 988, 209, 12, 9,
            1000, 209, 6, 209, 3, 203, 0, 1008, 1000, 1, 63, 1005, 63, 65, 1008, 1000, 2, 63, 1005, 63, 904, 1008, 1000,
@@ -214,4 +236,3 @@ PROGRAM = [1102, 34463338, 34463338, 63, 1007, 63, 34463338, 63, 1005, 63, 53, 1
 
 BOOST = Computer(PROGRAM)
 print(BOOST.run([1]))
-
