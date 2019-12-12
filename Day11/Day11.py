@@ -31,7 +31,8 @@ def parse_opcode(opcode: int, num_modes: int = 3) -> Tuple[Opcode, Modes]:
     return Opcode(opcode_part), modes
 
 
-Program = List[int]
+class EndProgram(Exception):
+    pass
 
 
 class Computer:
@@ -66,13 +67,12 @@ class Computer:
 
     def run(self, input: List[int]) -> List[int]:
         program = self.program
-        output = []
 
         while True:
             opcode, modes = parse_opcode(program[self.pos])
 
             if opcode == Opcode.END_PROGRAM:
-                break
+                raise EndProgram
             elif opcode == Opcode.ADD:
                 value1 = self.get_value(self.pos + 1, modes[0])
                 value2 = self.get_value(self.pos + 2, modes[1])
@@ -101,10 +101,10 @@ class Computer:
             elif opcode == Opcode.SEND_TO_OUTPUT:
                 # Get output from location
                 value = self.get_value(self.pos + 1, modes[0])
-                output.append(value)
                 # print(
                 #   f"current location {self.pos}, value at position {program[self.pos]}, current instruction {opcode}, value1 {value}, output {output}")
                 self.pos += 2
+                return value
 
             elif opcode == Opcode.JUMP_IF_TRUE:
                 # jump if true
@@ -210,56 +210,64 @@ ROBOT = Computer(ACTUAL_INPUT)
 # print(ROBOT.run([0]))
 
 
+def turn(direction, instruction):
+    if direction == 'UP':
+        if instruction == 0:
+            return 'LEFT'
+        else:
+            return 'RIGHT'
+    elif direction == 'LEFT':
+        if instruction == 0:
+            return 'DOWN'
+        else:
+            return 'UP'
+    elif direction == 'DOWN':
+        if instruction == 0:
+            return 'RIGHT'
+        else:
+            return 'LEFT'
+    elif direction == 'RIGHT':
+        if instruction == 0:
+            return 'UP'
+        else:
+            return 'DOWN'
+
+
+def move(direction, position):
+    if direction == 'UP':
+        position[1] += 1
+    elif direction == 'LEFT':
+        position[0] -= 1
+    elif direction == 'DOWN':
+        position[1] -= 1
+    elif direction == 'RIGHT':
+        position[0] += 1
+    return position
+
+
 def paint(robot: Computer) -> Dict:
     panels_painted = {}
     position = [0, 0]
     direction = 'UP'
-    while True:
-        if tuple(position) in panels_painted.keys():
-            input_color = panels_painted[tuple(position)]
-        else:
-            input_color = 0
-        output = robot.run([input_color])
-        if len(output) != 2:
-            break
-        panels_painted[tuple(position)] = output[0]
-        if direction == 'UP':
-            if output[1] == 0:
-                direction = 'LEFT'
-                position[0] -= 1
-            elif output[1] == 1:
-                direction = 'RIGHT'
-                position[0] += 1
+    outputs = []
+    try:
+        while True:
+            # get input color
+            if tuple(position) in panels_painted.keys():
+                input_color = panels_painted[tuple(position)]
             else:
-                raise ValueError(f'Bad direction {output[1]}')
-        elif direction == 'LEFT':
-            if output[1] == 0:
-                direction = 'DOWN'
-                position[1] -= 1
-            elif output[1] == 1:
-                direction = 'UP'
-                position[1] += 1
-            else:
-                raise ValueError(f'Bad direction {output[1]}')
-        elif direction == 'DOWN':
-            if output[1] == 0:
-                direction = 'RIGHT'
-                position[0] += 1
-            elif output[1] == 1:
-                direction = 'LEFT'
-                position[0] -= 1
-            else:
-                raise ValueError(f'Bad direction {output[1]}')
-        elif direction == 'RIGHT':
-            if output[1] == 0:
-                direction = 'UP'
-                position[1] += 1
-            elif output[1] == 1:
-                direction = 'DOWN'
-                position[1] -= 1
-            else:
-                raise ValueError(f'Bad direction {output[1]}')
-    return panels_painted
+                input_color = 0
+
+            outputs.append(robot.run([input_color]))
+            outputs.append(robot.run([]))
+
+            if len(outputs) == 2:
+                panels_painted[tuple(position)] = outputs[0]
+                direction = turn(direction, outputs[1])
+                position = move(direction, position)
+                outputs.clear()
+    except EndProgram:
+        return panels_painted
 
 
 panels = paint(ROBOT)
