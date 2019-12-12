@@ -174,8 +174,6 @@ class Computer:
                 raise RuntimeError(f"invalid opcode: {opcode}")
             self.step += 1
 
-        return output
-
 
 ACTUAL_INPUT = [3, 8, 1005, 8, 314, 1106, 0, 11, 0, 0, 0, 104, 1, 104, 0, 3, 8, 1002, 8, -1, 10, 1001, 10, 1, 10, 4, 10,
                 108, 1, 8, 10, 4, 10, 1002, 8, 1, 28, 2, 2, 16, 10, 1, 1108, 7, 10, 1006, 0, 10, 1, 5, 14, 10, 3, 8,
@@ -246,7 +244,7 @@ def move(direction, position):
 
 
 def paint(robot: Computer) -> Dict:
-    panels_painted = {}
+    panels_painted = {(0, 0): 1}
     position = [0, 0]
     direction = 'UP'
     outputs = []
@@ -271,5 +269,31 @@ def paint(robot: Computer) -> Dict:
 
 
 panels = paint(ROBOT)
-print(panels)
-print(len(panels.keys()))
+
+
+# print(panels)
+# print(len(panels.keys()))
+
+
+def decode_message(panels):
+    max_rows = max([abs(pos[1]) for pos in panels.keys()])
+    max_cols = max([abs(pos[0]) for pos in panels.keys()])
+    print(max_rows)
+    print(max_cols)
+    grid = [[' ' for _ in range(max_cols + 1)] for _ in range(max_rows + 1)]
+    for p in panels:
+        x = abs(p[0])
+        y = abs(p[1])
+        if panels[p] == 1:
+            grid[y][x] = 'X'
+    for m in grid:
+        line = ''
+        for n in m:
+            if n == 'X':
+                line += 'X'
+            else:
+                line += ' '
+        print(line)
+
+
+decode_message(panels)
